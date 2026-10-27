@@ -25,12 +25,28 @@ export function activate(context: vscode.ExtensionContext) {
         updateWebview();
     });
 
-    // 2. Следим за изменением текста (вставка)
-    const pasteListener = vscode.workspace.onDidChangeTextDocument(event => {
-        if (event.contentChanges.length > 0 && event.contentChanges[0].text.length > 1) {
-            stats['Paste (Вставка текста)']++;
-            context.globalState.update(STORAGE_KEY, stats);
-            updateWebview();
+    // 2. Следим за изменением текста (точная вставка через буфер обмена)
+    const pasteListener = vscode.workspace.onDidChangeTextDocument(async (event) => {
+        // Если текст изменился
+        if (event.contentChanges.length > 0) {
+            const insertedText = event.contentChanges[0].text;
+            
+            // Если вставилось больше 1 символа, проверяем буфер обмена
+            if (insertedText.length > 1) {
+                try {
+                    // Читаем текущий буфер обмена
+                    const clipboardText = await vscode.env.clipboard.readText();
+                    
+                    // Если вставленный текст совпадает с буфером обмена
+                    if (insertedText === clipboardText) {
+                        stats['Paste (Вставка текста)']++;
+                        context.globalState.update(STORAGE_KEY, stats);
+                        updateWebview();
+                    }
+                } catch (e) {
+                    console.error('Ошибка чтения буфера обмена', e);
+                }
+            }
         }
     });
 
