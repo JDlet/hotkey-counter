@@ -18,15 +18,14 @@ export function activate(context: vscode.ExtensionContext) {
         }
     };
 
-    // 1. Следим за сохранением файлов (Ctrl+S / Cmd+S)
+    // 1. Следим за сохранением файлов
     const saveListener = vscode.workspace.onDidSaveTextDocument(() => {
         stats['Save (Сохранение файла)']++;
         context.globalState.update(STORAGE_KEY, stats);
         updateWebview();
     });
 
-    // 2. Следим за изменением текста (отлавливаем вставку Ctrl+V)
-    // Если текст изменился сразу на несколько символов — это вставка.
+    // 2. Следим за изменением текста (вставка)
     const pasteListener = vscode.workspace.onDidChangeTextDocument(event => {
         if (event.contentChanges.length > 0 && event.contentChanges[0].text.length > 1) {
             stats['Paste (Вставка текста)']++;
@@ -35,19 +34,17 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // 3. Команда: Открыть красивое окно (Дашборд) по Ctrl+Alt+H
+    // 3. Открыть дашборд по Ctrl+Alt+H
     const showDisposable = vscode.commands.registerCommand('hotkey-counter.showStats', () => {
         stats['Custom (Нажатие Ctrl+Alt+H)']++;
         context.globalState.update(STORAGE_KEY, stats);
 
-        // Если панель уже открыта, просто показываем её и обновляем данные
         if (currentPanel) {
             currentPanel.reveal(vscode.ViewColumn.One);
             updateWebview();
             return;
         }
 
-        // Создаем новую панель
         currentPanel = vscode.window.createWebviewPanel(
             'hotkeyStats',
             'Статистика горячих клавиш',
@@ -57,13 +54,28 @@ export function activate(context: vscode.ExtensionContext) {
 
         updateWebview();
 
-        // Очищаем ссылку при закрытии, чтобы можно было открыть заново
         currentPanel.onDidDispose(() => {
             currentPanel = undefined;
         }, null, context.subscriptions);
     });
 
-    context.subscriptions.push(saveListener, pasteListener, showDisposable);
+    // 4. Обнулить статистику по Ctrl+Alt+R
+    const resetDisposable = vscode.commands.registerCommand('hotkey-counter.resetStats', () => {
+        // Обнуляем все значения
+        Object.keys(stats).forEach(key => {
+            stats[key] = 0;
+        });
+
+        // Сохраняем обнуленные данные
+        context.globalState.update(STORAGE_KEY, stats);
+        
+        // Обновляем окно, если оно открыто
+        updateWebview();
+
+        vscode.window.showInformationMessage('Статистика успешно обнулена!');
+    });
+
+    context.subscriptions.push(saveListener, pasteListener, showDisposable, resetDisposable);
 }
 
 // Функция для генерации красивого HTML/CSS
@@ -144,8 +156,10 @@ function getWebviewContent(stats: Record<string, number>): string {
         </table>
     </div>
     <div class="footer">
-        Попробуй нажать <b>Cmd+S</b> (сохранить), <b>Cmd+V</b> (вставить) или <b>Cmd+Alt+H</b>.<br>
-        Окно обновится автоматически.
+        <b>Cmd+S</b> / <b>Ctrl+S</b> — сохранить<br>
+        <b>Cmd+V</b> / <b>Ctrl+V</b> — вставить<br>
+        <b>Cmd+Alt+H</b> / <b>Ctrl+Alt+H</b> — открыть это окно<br>
+        <b>Cmd+Alt+R</b> / <b>Ctrl+Alt+R</b> — обнулить статистику
     </div>
 </body>
 </html>`;

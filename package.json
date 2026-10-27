@@ -22,6 +22,10 @@
       {
         "command": "hotkey-counter.showStats",
         "title": "Hotkey Counter: Открыть статистику (Дашборд)"
+      },
+      {
+        "command": "hotkey-counter.resetStats",
+        "title": "Hotkey Counter: Обнулить статистику"
       }
     ],
     "keybindings": [
@@ -29,6 +33,11 @@
         "command": "hotkey-counter.showStats",
         "key": "ctrl+alt+h",
         "mac": "cmd+alt+h"
+      },
+      {
+        "command": "hotkey-counter.resetStats",
+        "key": "ctrl+alt+r",
+        "mac": "cmd+alt+r"
       }
     ]
   },
