@@ -1,0 +1,61 @@
+{
+  "name": "hotkey-counter",
+  "displayName": "Hotkey Counter",
+  "description": "Counts hotkey presses and shows a beautiful dashboard",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JDlet/hotkey-counter.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "hotkey-counter.showStats",
+        "title": "Hotkey Counter: Открыть статистику (Дашборд)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "hotkey-counter.showStats",
+        "key": "ctrl+alt+h",
+        "mac": "cmd+alt+h"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "typescript-eslint": "^8.0.0",
+    "eslint": "^9.0.0",
+    "esbuild": "^0.24.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.4.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0"
+  }
+}
